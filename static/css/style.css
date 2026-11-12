@@ -317,3 +317,11 @@ header h1 {
     color: #1a6fa0;
     border: 1px solid #aed6f1;
 }
+
+/* ── Field Hint ───────────────────────────────────────────── */
+.field-hint {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: #888;
+}
