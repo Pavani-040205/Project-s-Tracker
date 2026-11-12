@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project's Tracker</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      color: #2d3748;
+      min-height: 100vh;
+    }
+
+    /* ── Header ───────────────────────────────────────────────────── */
+    header {
+      background: #4a6fa5;
+      color: #fff;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    }
+    header h1 { font-size: 1.5rem; font-weight: 600; }    /* ── Layout ───────────────────────────────────────────────────── */
+    main {
+      max-width: 760px;
+      margin: 2.5rem auto;
+      padding: 0 1rem;
+    }
+
+    /* ── Card ─────────────────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      margin-bottom: 2rem;
+    }
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #4a6fa5;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.5rem;
+    }
+
+    /* ── Form elements ────────────────────────────────────────────── */
+    .input-row {
+      display: flex;
+      gap: 0.6rem;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 0.55rem 0.9rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: border-color .2s;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #4a6fa5;
+      box-shadow: 0 0 0 3px rgba(74,111,165,.15);
+    }
+
+    /* ── Buttons ──────────────────────────────────────────────────── */
+    .btn {
+      padding: 0.55rem 1.1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary   { background: #4a6fa5; color: #fff; }
+    .btn-primary:hover { background: #3b5b8a; }
+    .btn-danger    { background: #e53e3e; color: #fff; }
+    .btn-danger:hover  { background: #c53030; }
+    .btn-secondary { background: #718096; color: #fff; }
+    .btn-secondary:hover { background: #4a5568; }
+    .btn-restore   { background: #38a169; color: #fff; }
+    .btn-restore:hover { background: #276749; }
+    .btn-perm-delete { background: #742a2a; color: #fff; }
+    .btn-perm-delete:hover { background: #5c1f1f; }
+
+    /* ── Project list ─────────────────────────────────────────────── */
+    .project-list { list-style: none; }
+    .project-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 0.6rem;
+      background: #f7fafc;
+      transition: box-shadow .2s;
+    }
+    .project-list li:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    .project-name { font-weight: 500; font-size: 1rem; }
+    .project-actions { display: flex; gap: 0.5rem; }
+
+    .empty-state {
+      text-align: center;
+      color: #a0aec0;
+      font-style: italic;
+      padding: 1rem 0;
+    }
+
+    /* ── Recently Deleted card ────────────────────────────────────── */
+    .deleted-card {
+      background: #fff5f5;
+      border: 1px solid #fed7d7;
+      border-radius: 10px;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+      margin-bottom: 2rem;
+    }
+    .deleted-card h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #c53030;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #fed7d7;
+      padding-bottom: 0.5rem;
+    }
+    .deleted-card .project-list li {
+      background: #fff;
+      border-color: #fed7d7;
+    }
+    .deleted-name {
+      font-weight: 500;
+      font-size: 1rem;
+      color: #718096;
+      text-decoration: line-through;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:1.6rem;">📋</span>
+  <h1>Project's Tracker</h1>
+  <div style="margin-left:auto; display:flex; align-items:center; gap:1rem;">
+    <span style="font-size:0.9rem; opacity:0.9;">👤 {{ session['username'] }}</span>
+    <a href="/logout">
+      <button type="button" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.9rem;">Logout</button>
+    </a>
+  </div>
+</header>
+
+<main>
+
+  <!-- Create project -->
+  <div class="card">
+    <h2>Create New Project</h2>
+    <form action="/create_project" method="POST">
+      <div class="input-row">
+        <input
+          type="text"
+          name="project_name"
+          placeholder="e.g. DBMS Mini Project"
+          required
+          aria-label="Project name"
+        />
+        <button type="submit" class="btn btn-primary">+ Create</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Project list -->
+  <div class="card">
+    <h2>Your Projects</h2>
+
+    {% if projects %}
+      <ul class="project-list">
+        {% for project in projects %}
+        <li>
+          <span class="project-name">{{ project['name'] }}</span>
+          <div class="project-actions">
+            <a href="/project/{{ project['id'] }}">
+              <button type="button" class="btn btn-primary">Open</button>
+            </a>
+            <form action="/delete_project/{{ project['id'] }}" method="POST"
+                  onsubmit="return confirm('Move this project to Recently Deleted?');">
+              <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-state">No projects yet. Create one above to get started.</p>
+    {% endif %}
+
+  </div>
+
+  <!-- Recently Deleted -->
+  {% if deleted_projects %}
+  <div class="deleted-card">
+    <h2>🗑️ Recently Deleted</h2>
+    <ul class="project-list">
+      {% for project in deleted_projects %}
+      <li>
+        <span class="deleted-name">{{ project['name'] }}</span>
+        <div class="project-actions">
+          <form action="/restore_project/{{ project['id'] }}" method="POST">
+            <button type="submit" class="btn btn-restore">Restore</button>
+          </form>
+          <form action="/delete_project_permanent/{{ project['id'] }}" method="POST"
+                onsubmit="return confirm('Permanently delete this project? All members and tasks will be lost.');">
+            <button type="submit" class="btn btn-perm-delete">Delete Permanently</button>
+          </form>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+</main>
+
+</body>
+</html>
