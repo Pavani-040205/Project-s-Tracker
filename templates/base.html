@@ -12,6 +12,7 @@
         {% if session.get('username') %}
         <div class="header-user">
             <span>👤 {{ session['username'] }}</span>
+            <a href="/change_password" class="btn-logout">Change Password</a>
             <a href="/logout" class="btn-logout">Log Out</a>
         </div>
         {% endif %}

@@ -68,6 +68,8 @@ def register():
 
         if not username or not password:
             error = 'Username and password are required.'
+        elif not any(c.isalpha() for c in password) or not any(c.isdigit() for c in password):
+            error = 'Password must contain both letters and numbers.'
         elif password != confirm:
             error = 'Passwords do not match.'
         else:
@@ -93,6 +95,44 @@ def logout():
     session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
+
+
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    """Allow logged-in user to change their password."""
+    error = None
+    if request.method == 'POST':
+        current  = request.form.get('current_password', '')
+        new_pw   = request.form.get('new_password', '')
+        confirm  = request.form.get('confirm_password', '')
+
+        conn = get_db()
+        user = conn.execute(
+            'SELECT * FROM users WHERE id = ?', (session['user_id'],)
+        ).fetchone()
+        conn.close()
+
+        if user['password'] != hash_password(current):
+            error = 'Current password is incorrect.'
+        elif not any(c.isalpha() for c in new_pw) or not any(c.isdigit() for c in new_pw):
+            error = 'New password must contain both letters and numbers.'
+        elif new_pw != confirm:
+            error = 'New passwords do not match.'
+        elif new_pw == current:
+            error = 'New password must be different from the current one.'
+        else:
+            conn = get_db()
+            conn.execute(
+                'UPDATE users SET password = ? WHERE id = ?',
+                (hash_password(new_pw), session['user_id'])
+            )
+            conn.commit()
+            conn.close()
+            flash('Password changed successfully!', 'success')
+            return redirect(url_for('index'))
+
+    return render_template('change_password.html', error=error)
 
 
 # ── App Routes ─────────────────────────────────────────────────────────────
