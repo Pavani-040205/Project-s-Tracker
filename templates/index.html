@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Home – Group Assignment Tracker{% endblock %}
+
+{% block content %}
+<section class="card" id="create-project">
+    <h2>Create New Project</h2>
+    <form action="/create_project" method="POST" class="create-form">
+        <label for="project_name">Project Name</label>
+        <div class="input-row">
+            <input
+                type="text"
+                id="project_name"
+                name="project_name"
+                placeholder="Enter project name…"
+                maxlength="120"
+                required
+            />
+            <button type="submit" class="btn btn-primary">Create Project</button>
+        </div>
+    </form>
+</section>
+
+<section class="card" id="project-list">
+    <h2>All Projects</h2>
+
+    {% if projects %}
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Project Name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td>{{ project['id'] }}</td>
+                <td>{{ project['project_name'] }}</td>
+                <td>
+                    <a href="/project/{{ project['id'] }}" class="btn btn-secondary">Open</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty-msg">No projects yet. Create one above to get started.</p>
+    {% endif %}
+</section>
+{% endblock %}
